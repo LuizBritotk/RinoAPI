@@ -21,12 +21,12 @@ namespace Rino.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> AuthenticateUserLogin([FromBody] LoginCommand loginCommand)
         {
-            var token = await _userHandler.Authenticate(loginCommand);
+            var user = await _userHandler.Authenticate(loginCommand);
 
-            if (token == null)
+            if (user == null)
                 return Unauthorized();
 
-            return Ok(new { Token = token });
+            return Ok(new { Token = user });
         }
     }
 }

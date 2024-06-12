@@ -22,7 +22,7 @@ namespace Rino.Infrastructure.Repositories
             // Dados mockados para simular uma busca em um banco de dados
             var mockUser = new User
             {
-                Id = UuidGenerator.GenerateUuid(), // Gerando UUID
+                Id = UuidGenerator.GenerateUuid(), // Gerando UUID  
                 Email = "luizABrito@Hotmail.com",
                 Login = "luiz.brito",
                 PasswordHash = "6faf449387ac41c60ca335f2e4481e6d771a6741bfac8045c8cc0b1eeecac59d", //LuizAcessoAPI

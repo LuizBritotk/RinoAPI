@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Rino.Domain.Entities;
 using Rino.Domain.Repositories;
 using Rino.Domain.Services;
+using Rino.Infrastructure.Authentication;
 using Rino.Infrastructure.Utilities;
 
 namespace Rino.Infrastructure.Services
@@ -24,7 +21,7 @@ namespace Rino.Infrastructure.Services
             _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
         }
 
-        public async Task<string> LoginAsync(LoginCommand loginCommand)
+        public async Task<User> LoginAsync(LoginCommand loginCommand)
         {
             if (loginCommand == null)
                 throw new ArgumentNullException(nameof(loginCommand));
@@ -34,7 +31,8 @@ namespace Rino.Infrastructure.Services
             if (user == null || !_passwordHasher.VerifyPassword(loginCommand.Password, user.PasswordHash))
                 return null;
 
-            return _jwtHandler.GenerateToken(user);
+            user.TokenJWT = _jwtHandler.GenerateToken(user);
+            return user;
         }
     }
 }

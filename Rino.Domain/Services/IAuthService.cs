@@ -4,6 +4,6 @@ namespace Rino.Domain.Services
 {
     public interface IAuthService
     {
-        Task<string> LoginAsync(LoginCommand loginCommand);
+        Task<User> LoginAsync(LoginCommand loginCommand);
     }
 }

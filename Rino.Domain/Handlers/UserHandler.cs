@@ -1,4 +1,5 @@
-﻿using Rino.Domain.Entities;
+﻿using System.Threading.Tasks;
+using Rino.Domain.Entities;
 using Rino.Domain.Services;
 
 namespace Rino.Domain.Handlers
@@ -12,7 +13,7 @@ namespace Rino.Domain.Handlers
             _authService = authService;
         }
 
-        public async Task<string> Authenticate(LoginCommand loginCommand)
+        public async Task<User> Authenticate(LoginCommand loginCommand)
         {
             return await _authService.LoginAsync(loginCommand);
         }

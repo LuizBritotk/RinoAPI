@@ -1,48 +1,42 @@
-using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Rino.Domain.Services;
-using Rino.Infrastructure.Data;
-using Rino.Infrastructure.Services;
-using Rino.Domain.Repositories;
+using Microsoft.OpenApi.Models;
 using Rino.API.Configurations;
-using Rino.Infrastructure.Utilities;
 using Rino.Domain.Handlers;
+using Rino.Domain.Repositories;
+using Rino.Domain.Services;
+using Rino.Infrastructure.Authentication;
+using Rino.Infrastructure.Data;
+using Rino.Infrastructure.Repositories;
+using Rino.Infrastructure.Services;
+using Rino.Infrastructure.Utilities;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Configurações e serviços
-
-#region Configuração de Dependências e Injeção de Dependência
 
 // Add services to the container.
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
-// Registrar PasswordHasher
+// Register PasswordHasher
 builder.Services.AddSingleton<PasswordHasher>();
 
-// Registrar Handlers
-builder.Services.AddTransient<UserHandler, UserHandler>();
+// Register JwtHandler
+builder.Services.AddScoped<IJwtHandler, JwtHandler>();
 
-// Registrar todos os serviços no assembly atual
+// Register UserHandler
+builder.Services.AddScoped<UserHandler>();
+
+// Register other services
 builder.Services.Scan(scan => scan
     .FromAssembliesOf(typeof(IJwtHandler), typeof(AuthService))
     .AddClasses(classes => classes.AssignableToAny(typeof(IJwtHandler), typeof(IAuthService), typeof(IUserRepository)))
     .AsImplementedInterfaces()
     .WithScopedLifetime());
 
-#endregion
-
-#region Configuração do Banco de Dados
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-#endregion
-
-#region Configuração de Autenticação e Autorização
 
 builder.Services.AddAuthentication(options =>
 {
@@ -59,31 +53,21 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]!))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
     };
 });
 
-#endregion
-
-#region Configuração dos Controladores e Rotas
-
 builder.Services.AddControllers();
 
-#endregion
-
-#region Configuração do Swagger
-
+// Add Swagger
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rino API", Version = "v1" });
 });
 
-#endregion
-
 var app = builder.Build();
 
-// Configuração do Pipeline de Requisição HTTP
-
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -94,7 +78,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Configuração do Swagger UI
+// Add Swagger UI
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -103,7 +87,7 @@ app.UseSwaggerUI(c =>
 
 app.UseEndpoints(endpoints =>
 {
-    endpoints?.MapControllers();
+    endpoints.MapControllers();
 });
 
 app.Run();
