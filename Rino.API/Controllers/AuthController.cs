@@ -26,7 +26,88 @@ namespace Rino.API.Controllers
             if (user == null)
                 return Unauthorized();
 
-            return Ok(new { Token = user });
+            return Ok(new { user });
+        }
+
+        [HttpPost("register")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RegisterUser([FromBody] RegisterCommand registerCommand)
+        {
+            var result = await _userHandler.Register(registerCommand);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(result.Message);
+        }
+
+        [HttpPut("profile")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileCommand updateProfileCommand)
+        {
+            // Obter o nome do usuário atualmente autenticado
+            var userName = User.Identity.Name;
+
+            var result = await _userHandler.UpdateProfile(userName, updateProfileCommand);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(result.Message);
+        }
+
+        [HttpPut("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand changePasswordCommand)
+        {
+            // Obter o nome do usuário atualmente autenticado
+            var userName = User.Identity.Name;
+
+            var result = await _userHandler.ChangePassword(userName, changePasswordCommand);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(result.Message);
+        }
+
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand forgotPasswordCommand)
+        {
+            var result = await _userHandler.ForgotPassword(forgotPasswordCommand.Email);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(result.Message);
+        }
+
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand resetPasswordCommand)
+        {
+            var result = await _userHandler.ResetPassword(resetPasswordCommand);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(result.Message);
+        }
+
+        [HttpGet("user")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUserInfo()
+        {
+            // Obter o nome do usuário atualmente autenticado
+            var userName = User.Identity.Name;
+
+            var user = await _userHandler.GetUserInfo(userName);
+
+            if (user == null)
+                return NotFound("User not found");
+
+            return Ok(user);
         }
     }
 }

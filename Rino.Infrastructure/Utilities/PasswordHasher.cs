@@ -1,10 +1,11 @@
 ﻿using BCrypt.Net;
+using Rino.Domain.Interfaces;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace Rino.Infrastructure.Utilities
 {
-    public class PasswordHasher
+    public class PasswordHasher : IPasswordHasher
     {
     
         // Método para desmascarar a senha usando SHA-256
