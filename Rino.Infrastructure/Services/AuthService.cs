@@ -5,6 +5,7 @@ using Rino.Domain.Repositories;
 using Rino.Domain.Services;
 using Rino.Infrastructure.Authentication;
 using Rino.Infrastructure.Utilities;
+using Microsoft.Extensions.Configuration;
 
 namespace Rino.Infrastructure.Services
 {
@@ -28,8 +29,8 @@ namespace Rino.Infrastructure.Services
 
             var user = await _userRepository.FindByUsernameAndPassword(loginCommand);
 
-            if (user == null || !_passwordHasher.VerifyPassword(loginCommand.Password, user.PasswordHash))
-                return null;
+            if (user is null || !_passwordHasher.VerifyPassword(loginCommand.Password, user.PasswordHash))
+                return null!;
 
             user.TokenJWT = _jwtHandler.GenerateToken(user);
             return user;
