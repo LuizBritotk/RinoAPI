@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Rino.Domain.Entities;
 using Rino.Domain.Services;
+using Rino.Infrastructure.Utilities;
 
 namespace Rino.Infrastructure.Authentication
 {
@@ -24,6 +25,8 @@ namespace Rino.Infrastructure.Authentication
             if (user == null)
                 throw new ArgumentNullException(nameof(user), "User cannot be null.");
 
+            var claims = MockClaimsProvider.GetDefaultClaims(user); // Obtendo claims mock
+
             var secret = _configuration["JwtSettings:Secret"];
             var issuer = _configuration["JwtSettings:Issuer"];
             var audience = _configuration["JwtSettings:Audience"];
@@ -38,13 +41,6 @@ namespace Rino.Infrastructure.Authentication
 
             try
             {
-                // Lista de claims padrão
-                var claims = new List<Claim>
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                    new Claim("password_reset", "true") // Claim de teste para reset de senha
-                };
 
                 // Cria a chave de segurança com base no segredo configurado
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));

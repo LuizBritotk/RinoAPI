@@ -29,4 +29,32 @@ public class AuthService : IAuthService
         user.TokenJWT = _jwtHandler.GenerateToken(user);
         return user;
     }
+    public async Task<OperationResult> RegisterUserAsync(UserCreateCommand registerCommand)
+    {
+        if (registerCommand == null)
+            throw new ArgumentNullException(nameof(registerCommand));
+
+        var existingUser = await _userRepository.GetUserByUsername(registerCommand.Login);
+
+        if (existingUser != null)
+            return new OperationResult(false, "Username already exists");
+
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = registerCommand.Email,
+            Login = registerCommand.Login,
+            FirstName = registerCommand.FirstName,
+            LastName = registerCommand.LastName,
+            PhoneNumber = registerCommand.PhoneNumber,
+            DateOfBirth = registerCommand.DateOfBirth,
+            PasswordHash = registerCommand.PasswordHash
+        };
+
+        await _userRepository.CreateUser(user);
+
+        user.TokenJWT = _jwtHandler.GenerateToken(user); 
+
+        return new OperationResult(true, "User registered successfully");
+    }
 }

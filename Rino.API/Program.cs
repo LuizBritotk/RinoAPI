@@ -1,18 +1,14 @@
-// Importações de namespaces necessárias
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Rino.API.Configurations;
 using Rino.Domain.Handlers;
-using Rino.Domain.Interfaces; // Importação da interface IPasswordHasher
+using Rino.Domain.Interfaces;
 using Rino.Domain.Repositories;
 using Rino.Domain.Services;
 using Rino.Infrastructure.Authentication;
 using Rino.Infrastructure.Data;
-using Rino.Infrastructure.Repositories;
-//using Rino.Infrastructure.Services;
 using Rino.Infrastructure.Utilities;
 using System.Text;
 
@@ -69,6 +65,32 @@ builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Rino API", Version = "v1" });
+
+    // Configuração de autenticação JWT para o Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Informe o token JWT no campo abaixo: Bearer {seu token}"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 var app = builder.Build();
